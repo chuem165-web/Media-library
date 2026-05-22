@@ -1,46 +1,51 @@
 <?php
 
-/**
- * Handles displaying detailed information
- * for a single catalog item.
- */
+require_once BASE_PATH . '/Controller/BaseController.php';
 
-class DetailsController
+class DetailsController extends BaseController
 {
     private CatalogService $catalogService;
 
-    public function __construct(CatalogService $catalogService)
-    {
-        // Inject catalog service dependency
+    public function __construct(
+        CatalogService $catalogService
+    ) {
         $this->catalogService = $catalogService;
     }
 
-    // Show item details page
-    public function show()
+    public function show(): void
     {
-        // Validate item ID from URL
-        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $id = $this->input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
 
-        // Redirect if ID is invalid
         if (!$id) {
-            header("Location: " . BASE_URL . "/Public/index.php?page=catalog");
-            exit;
+            $this->redirectCatalog();
         }
 
-        // Get item data from service
-        $item = $this->catalogService->single_item_array($id);
+        $item = $this->catalogService
+            ->getSingleItem($id);
 
-        // Redirect if item does not exist
-        if (empty($item)) {
-            header("Location: " . BASE_URL . "/Public/index.php?page=catalog");
-            exit;
+        if (!$item) {
+            $this->redirectCatalog();
         }
 
-        // Page information
-        $pageTitle = $item['title'];
-        $section   = $item['category'];
+        $this->render(
+            'details',
+            [
+                'item' => $item,
+                'pageTitle' => $item['title'],
+                'section' => $item['category']
+            ]
+        );
+    }
 
-        // Load details view
-        require BASE_PATH . '/view/details.php';
+    private function redirectCatalog(): void
+    {
+        $this->redirect(
+            BASE_URL
+            . '/Public/index.php?page=catalog'
+        );
     }
 }

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($pageTitle ?? 'Media Library') ?></title>
 
-    <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
+    <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css"> -->
+    <link rel="stylesheet" href="/library/MediaLibrary-MVC-/css/style.css">
 </head>
 <body>
 

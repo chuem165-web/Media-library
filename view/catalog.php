@@ -1,27 +1,36 @@
 <?php require BASE_PATH . '/view/layout/header.php'; ?>
 
+<?php
+$found_in_full_catalog = $found_in_full_catalog ?? 0;
+?>
+
 <div class="section catalog page">
 	<div class="wrapper">
 
-		<h1>
-			<?php
-			if (!empty($search)) {
-				echo 'Search results for "' . htmlspecialchars($search) . '"';
+		<?php
 
-				if (!empty($section)) {
-					echo ' in ' . ucfirst($section);
-				}
-			} else {
-				if (!empty($section)) {
-					echo "<a href='index.php?page=catalog'>Full Catalog</a> &gt; ";
-				}
+$title = '';
 
-				echo htmlspecialchars($pageTitle);
-			}
-			?>
-		</h1>
+if (!empty($search)) {
 
-		<?php if ($total_items < 1): ?>
+    $title = 'Search results for "' . htmlspecialchars($search) . '"';
+
+    if (!empty($section)) {
+        $title .= ' in ' . ucfirst($section);
+    }
+
+} else {
+
+    if (!empty($section)) {
+        $title .= "<a href='index.php?page=catalog'>Full Catalog</a> &gt; ";
+    }
+
+    $title .= htmlspecialchars($pageTitle);
+}
+
+echo $title;
+?>
+		<?php if ($totalItems < 1): ?> 
 
 			<?php if (!empty($section) && $found_in_full_catalog > 0): ?>
 

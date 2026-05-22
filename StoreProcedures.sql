@@ -23,7 +23,7 @@ JOIN Media_Types mt
 -- VIEW: RANDOM
 -- =========================================
 
-CREATE OR REPLACE VIEW view_random AS
+CREATE OR REPLACE VIEW view_random AS -- if table is exist create ,REPLACE
 SELECT
     media_id,
     title,

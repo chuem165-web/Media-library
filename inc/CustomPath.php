@@ -5,8 +5,8 @@ spl_autoload_register(function ($class) {
 
     $paths = [
         'Controller/',
-        'Model/Service/',
-        'Model/Repository/',
+        'Service/',
+        'Repository/',
         'view/',           // ItemView lives here
         'inc/',             // Database, helpers if class-based
     ];

@@ -1,44 +1,85 @@
-
 <?php
-/**
- * Main application entry point.
- * Initializes dependencies, services, and application routing.
- */
-/*
-//Report simple running errors
-error_reporting(E_ALL);
-//Make sure they are on screen
-ini_set('display_errors',1);
-//HTML formatted errors
-ini_set('html_errors',1);
-        OR
-use @ in front of error
-*/
-define('BASE_PATH', dirname(__DIR__));
+use Dotenv\Dotenv;
+use Dotenv\Exception\InvalidPathException;
+
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+}
 
 require_once BASE_PATH . '/vendor/autoload.php';
+
+try {
+    Dotenv::createImmutable(BASE_PATH)->safeLoad();
+} catch (InvalidPathException $e) {
+    // Skip loading .env when the file is not present.
+}
+
 require_once BASE_PATH . '/inc/Database.php';
-require_once BASE_PATH . '/inc/CustomPath.php';
 
-use Dotenv\Dotenv;
-$dotenv = Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+require_once BASE_PATH . '/Interface/CatalogRepositoryInterface.php';
+require_once BASE_PATH . '/Interface/FormatRepositoryInterface.php';
+require_once BASE_PATH . '/Repository/BaseRepository.php';
+require_once BASE_PATH . '/Repository/CatalogRepository.php';
+require_once BASE_PATH . '/Repository/FormatRepository.php';
+require_once BASE_PATH . '/Service/BaseService.php';
+require_once BASE_PATH . '/Service/CatalogService.php';
+require_once BASE_PATH . '/Service/FormatService.php';
+require_once BASE_PATH . '/Service/SuggestService.php';
+require_once BASE_PATH . '/Service/MailService.php';
+require_once BASE_PATH . '/view/ItemView.php';
+require_once BASE_PATH . '/Controller/Api/ApiCatalogController.php';
+require_once BASE_PATH . '/Controller/Api/ApiDetailsController.php';
+require_once BASE_PATH . '/Controller/Api/ApiSuggestController.php';
+require_once BASE_PATH . '/Controller/CatalogController.php';
+require_once BASE_PATH . '/Controller/DetailsController.php';
+require_once BASE_PATH . '/Controller/SuggestController.php';
 
-/*BUILD SHARED OBJECTS*/
+$catalogService = new CatalogService();
+$formatService = new FormatService();
+$suggestService = new SuggestService();
+$mailService = new MailService();
 
-$db = Database::getConnection();
-
-/* Repositories */
-$catalogRepo = new CatalogRepository($db);
-$formatRepo  = new FormatRepository($db);
-
-/* Services */
-$catalogService = new CatalogService($catalogRepo);
-$formatService  = new FormatService($formatRepo);
-
-/*ROUTING */
+/* =========================
+   ROUTING
+========================= */
 
 $page = $_GET['page'] ?? 'home';
+
+/* =========================
+   API ROUTES (IMPORTANT FIRST)
+========================= */
+if (str_starts_with($page, 'api/')) {
+
+    switch ($page) {
+
+            case 'api/catalog':
+            $controller = new ApiCatalogController($catalogService);
+            $controller->index();
+            exit;
+
+        case 'api/details':
+            $controller = new ApiDetailsController($catalogService);
+            $controller->show();
+            exit;
+
+        case 'api/suggest':
+    $controller = new ApiSuggestController($formatService);
+    $controller->submit();
+    exit;
+
+        default:
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'API endpoint not found'
+            ]);
+            exit;
+    }
+}
+
+/* =========================
+   NORMAL MVC ROUTES
+========================= */
 
 switch ($page) {
 
@@ -48,7 +89,11 @@ switch ($page) {
         break;
 
     case 'suggest':
-        $controller = new SuggestController($formatService);
+        $controller = new SuggestController(
+            $formatService,
+            $suggestService,
+            $mailService
+        );
         $controller->index();
         break;
 
@@ -57,8 +102,8 @@ switch ($page) {
         $controller->index();
         break;
 
-    default: // HOME PAGE
+    default:
         $controller = new CatalogController($catalogService);
-        $controller->home();
+        $controller->index();
+        break;
 }
-
