@@ -17,28 +17,20 @@ try {
 
 
 require_once BASE_PATH . '/inc/Database.php';
-require_once BASE_PATH . '/Interface/BaseRepositoryInterface.php';
-require_once BASE_PATH . '/Interface/CatalogRepositoryInterface.php';
-require_once BASE_PATH . '/Interface/FormatRepositoryInterface.php';
-require_once BASE_PATH . '/Repository/BaseRepository.php';
-require_once BASE_PATH . '/Repository/CatalogRepository.php';
-require_once BASE_PATH . '/Repository/FormatRepository.php';
-require_once BASE_PATH . '/Service/BaseService.php';
-require_once BASE_PATH . '/Service/CatalogService.php';
-require_once BASE_PATH . '/Service/FormatService.php';
-require_once BASE_PATH . '/Service/SuggestService.php';
-require_once BASE_PATH . '/Service/MailService.php';
 require_once BASE_PATH . '/view/ItemView.php';
-require_once BASE_PATH . '/Controller/Api/ApiCatalogController.php';
-require_once BASE_PATH . '/Controller/Api/ApiDetailsController.php';
-require_once BASE_PATH . '/Controller/Api/ApiSuggestController.php';
-require_once BASE_PATH . '/Controller/CatalogController.php';
-require_once BASE_PATH . '/Controller/DetailsController.php';
-require_once BASE_PATH . '/Controller/SuggestController.php';
-require_once BASE_PATH . '/Interface/UserRepositoryInterface.php';
-require_once BASE_PATH . '/Repository/UserRepository.php';
-require_once BASE_PATH . '/Service/AuthService.php';
-require_once BASE_PATH . '/Controller/AuthController.php';
+
+use App\Service\CatalogService;
+use App\Service\FormatService;
+use App\Service\SuggestService;
+use App\Service\MailService;
+use App\Service\AuthService;
+use App\Controller\Api\ApiCatalogController;
+use App\Controller\Api\ApiDetailsController;
+use App\Controller\Api\ApiSuggestController;
+use App\Controller\CatalogController;
+use App\Controller\DetailsController;
+use App\Controller\SuggestController;
+use App\Controller\AuthController;
 
 $catalogService = new CatalogService();
 $formatService = new FormatService();
@@ -131,7 +123,7 @@ case 'logout':
     break;
 
     default:
-        $controller = new AuthController($authService);
-        $controller->register();
+        $controller = new CatalogController($catalogService);
+        $controller->home();
         break;
 }

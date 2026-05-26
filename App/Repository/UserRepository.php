@@ -1,6 +1,9 @@
 <?php
 
+namespace App\Repository;
+
 use App\Contract\UserRepositoryInterface;
+use PDO;
 
 class UserRepository
     extends BaseRepository
@@ -57,26 +60,6 @@ class UserRepository
         return $user ?: null;
     }
 
-    public function findById(
-        int $id
-    ): ?array {
-
-        $sql = "
-            SELECT *
-            FROM users
-            WHERE id = :id
-            LIMIT 1
-        ";
-
-        $stmt = $this->query($sql);
-
-        $stmt->execute([
-            ':id' => $id
-        ]);
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $user ?: null;
-    }
+    
 
 }

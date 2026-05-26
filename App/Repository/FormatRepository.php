@@ -1,5 +1,10 @@
 <?php
 
+namespace App\Repository;
+
+use App\Contract\FormatRepositoryInterface;
+use PDO;
+
 class FormatRepository extends BaseRepository implements FormatRepositoryInterface
 {
 protected string $table = 'formats';

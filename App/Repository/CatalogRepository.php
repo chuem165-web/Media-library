@@ -1,6 +1,9 @@
 <?php
 
+namespace App\Repository;
+
 use App\Contract\CatalogRepositoryInterface;
+use PDO;
 
 class CatalogRepository extends BaseRepository implements CatalogRepositoryInterface
 {

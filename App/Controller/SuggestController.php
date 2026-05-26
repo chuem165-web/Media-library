@@ -1,5 +1,11 @@
 <?php
 
+namespace App\Controller;
+
+use App\Service\FormatService;
+use App\Service\SuggestService;
+use App\Service\MailService;
+
 class SuggestController
     extends BaseController
 {

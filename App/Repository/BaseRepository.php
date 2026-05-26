@@ -1,6 +1,10 @@
 <?php
 
+namespace App\Repository;
+
 use App\Contract\BaseRepositoryInterface;
+use PDO;
+use PDOStatement;
 
 abstract class BaseRepository implements BaseRepositoryInterface
 {

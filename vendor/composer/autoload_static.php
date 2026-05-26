@@ -32,6 +32,10 @@ class ComposerStaticInitd0bf091f8f43ac0c4af44097b15683ea
         array (
             'Dotenv\\' => 7,
         ),
+        'A' =>
+        array (
+            'App\\' => 4,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -62,6 +66,10 @@ class ComposerStaticInitd0bf091f8f43ac0c4af44097b15683ea
         'Dotenv\\' =>
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
+        ),
+        'App\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/App',
         ),
     );
 

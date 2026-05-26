@@ -1,6 +1,9 @@
 <?php
 
+namespace App\Service;
+
 use App\Contract\CatalogRepositoryInterface;
+use App\Repository\CatalogRepository;
 
 class CatalogService extends BaseService
 {
@@ -17,7 +20,7 @@ class CatalogService extends BaseService
     public function __construct(?CatalogRepositoryInterface $repo = null)
     {
         if ($repo === null) {
-            $db = Database::getConnection();
+            $db = \Database::getConnection();
             $repo = new CatalogRepository($db);
         }
 

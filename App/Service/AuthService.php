@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Service;
+
+use App\Repository\UserRepository;
+
 class AuthService extends BaseService
 {
     private UserRepository $userRepository;

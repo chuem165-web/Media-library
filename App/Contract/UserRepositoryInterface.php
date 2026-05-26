@@ -14,7 +14,4 @@ interface UserRepositoryInterface
         string $email
     ): ?array;
 
-    public function findById(
-        int $id
-    ): ?array;
 }

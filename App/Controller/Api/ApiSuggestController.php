@@ -1,11 +1,8 @@
 <?php
 
-if (!defined('BASE_PATH')) {
-    define('BASE_PATH', dirname(__DIR__, 2));
-}
+namespace App\Controller\Api;
 
-require_once BASE_PATH . '/vendor/autoload.php';
-
+use App\Service\FormatService;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class ApiSuggestController
@@ -60,7 +57,7 @@ class ApiSuggestController
                 'data' => $data
             ]);
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
 
             echo json_encode([

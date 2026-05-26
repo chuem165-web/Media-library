@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Service;
+
 use PHPMailer\PHPMailer\PHPMailer;
 
 class MailService
@@ -59,7 +61,7 @@ class MailService
         );
 
         if (empty($recipient)) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 'No recipient configured for outgoing mail.'
             );
         }

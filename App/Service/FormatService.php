@@ -1,5 +1,10 @@
 <?php
 
+namespace App\Service;
+
+use App\Contract\FormatRepositoryInterface;
+use App\Repository\FormatRepository;
+
 class FormatService
     extends BaseService
 {

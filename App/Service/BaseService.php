@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Service;
+
 abstract class BaseService
 {
     protected function env(
@@ -18,8 +20,8 @@ abstract class BaseService
             : $default;
     }
 
-    protected function db(): PDO
+    protected function db(): \PDO
     {
-        return Database::getConnection();
+        return \Database::getConnection();
     }
 }

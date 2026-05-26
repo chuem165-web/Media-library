@@ -1,6 +1,8 @@
 <?php
 
-require_once BASE_PATH . '/Service/CatalogService.php';
+namespace App\Controller\Api;
+
+use App\Service\CatalogService;
 
 class ApiCatalogController
 {
@@ -26,7 +28,7 @@ class ApiCatalogController
                 'data' => $data
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             http_response_code(500);
 
