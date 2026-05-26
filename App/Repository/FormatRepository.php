@@ -2,6 +2,7 @@
 
 class FormatRepository extends BaseRepository implements FormatRepositoryInterface
 {
+protected string $table = 'formats';
     public function get_format_drop_down($category = null)
     {
         $stmt = $this->query("CALL sp_get_formats_by_category (:category)");

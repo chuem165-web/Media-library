@@ -7,6 +7,7 @@ if (!defined('BASE_PATH')) {
 }
 
 require_once BASE_PATH . '/vendor/autoload.php';
+session_start();
 
 try {
     Dotenv::createImmutable(BASE_PATH)->safeLoad();
@@ -14,8 +15,9 @@ try {
     // Skip loading .env when the file is not present.
 }
 
-require_once BASE_PATH . '/inc/Database.php';
 
+require_once BASE_PATH . '/inc/Database.php';
+require_once BASE_PATH . '/Interface/BaseRepositoryInterface.php';
 require_once BASE_PATH . '/Interface/CatalogRepositoryInterface.php';
 require_once BASE_PATH . '/Interface/FormatRepositoryInterface.php';
 require_once BASE_PATH . '/Repository/BaseRepository.php';
@@ -33,11 +35,16 @@ require_once BASE_PATH . '/Controller/Api/ApiSuggestController.php';
 require_once BASE_PATH . '/Controller/CatalogController.php';
 require_once BASE_PATH . '/Controller/DetailsController.php';
 require_once BASE_PATH . '/Controller/SuggestController.php';
+require_once BASE_PATH . '/Interface/UserRepositoryInterface.php';
+require_once BASE_PATH . '/Repository/UserRepository.php';
+require_once BASE_PATH . '/Service/AuthService.php';
+require_once BASE_PATH . '/Controller/AuthController.php';
 
 $catalogService = new CatalogService();
 $formatService = new FormatService();
 $suggestService = new SuggestService();
 $mailService = new MailService();
+$authService = new AuthService();
 
 /* =========================
    ROUTING
@@ -98,12 +105,33 @@ switch ($page) {
         break;
 
     case 'catalog':
-        $controller = new CatalogController($catalogService);
+        $controller = new CatalogController($catalogService , $authService);
         $controller->index();
         break;
 
+    case 'register':
+    $controller =
+        new AuthController($authService);
+
+    $controller->register();
+    break;
+
+case 'login':
+    $controller =
+        new AuthController($authService);
+
+    $controller->login();
+    break;
+
+case 'logout':
+    $controller =
+        new AuthController($authService);
+
+    $controller->logout();
+    break;
+
     default:
-        $controller = new CatalogController($catalogService);
-        $controller->index();
+        $controller = new AuthController($authService);
+        $controller->register();
         break;
 }

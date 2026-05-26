@@ -37,5 +37,7 @@ class CatalogController extends BaseController
             'catalog',
             $data
         );
+
+
     }
 }

@@ -5,7 +5,7 @@ abstract class BaseController
     /**
      * Load view file
      */
-    protected function render(
+    protected function render( /**render() is responsible for loading view pages and sending data from controller to view. */
         string $view,
         array $data = []
     ): void {
@@ -20,7 +20,7 @@ abstract class BaseController
     /**
      * Redirect helper
      */
-    protected function redirect(
+     protected function redirect( /**redirect() changes page location and exit prevents remaining code from running. */
         string $url
     ): void {
         header(

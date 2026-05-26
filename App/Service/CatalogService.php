@@ -1,5 +1,7 @@
 <?php
 
+use App\Contract\CatalogRepositoryInterface;
+
 class CatalogService extends BaseService
 {
     private const ITEMS_PER_PAGE = 8;
@@ -180,27 +182,32 @@ class CatalogService extends BaseService
 
     public function get_catalog_count($section, $search)
     {
-        return (int) $this->repo->getcatalog_count($section, $search);
+        $filters = [
+            'search' => $search,
+            'category' => $section
+        ];
+
+        return (int) $this->repo->count($filters);
     }
 
     public function search_catalog_array($search, $section, $limit, $offset)
     {
-        return $this->repo->get_search_catalog($search, $section, $limit, $offset);
+        return $this->repo->search($search, $section, $limit, $offset);
     }
 
     public function category_catalog_array($section, $limit, $offset)
     {
-        return $this->repo->get_category_catalog($section, $limit, $offset);
+        return $this->repo->getByCategory($section, $limit, $offset);
     }
 
     public function full_catalog_array($limit, $offset)
     {
-        return $this->repo->get_full_catalog($limit, $offset);
+        return $this->repo->getAll($limit, $offset);
     }
 
     public function random_catalog_array()
     {
-        return $this->repo->get_random_catalog();
+        return $this->repo->getRandom();
     }
 
      /* =========================================================
@@ -208,7 +215,7 @@ class CatalogService extends BaseService
      * ========================================================= */
     public function getSingleItem(int $id): ?array
 {
-    return $this->repo->get_single_item($id);
+    return $this->repo->getById($id);
 }
 
 
