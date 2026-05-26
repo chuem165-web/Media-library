@@ -24,19 +24,36 @@ use App\Service\FormatService;
 use App\Service\SuggestService;
 use App\Service\MailService;
 use App\Service\AuthService;
+use App\Service\Validator;
+
 use App\Controller\Api\ApiCatalogController;
 use App\Controller\Api\ApiDetailsController;
 use App\Controller\Api\ApiSuggestController;
+
 use App\Controller\CatalogController;
 use App\Controller\DetailsController;
 use App\Controller\SuggestController;
 use App\Controller\AuthController;
 
-$catalogService = new CatalogService();
-$formatService = new FormatService();
-$suggestService = new SuggestService();
-$mailService = new MailService();
-$authService = new AuthService();
+$catalogService =
+    new CatalogService();
+
+$formatService =
+    new FormatService();
+
+$suggestService =
+    new SuggestService();
+
+$mailService =
+    new MailService();
+
+$validator =
+    new Validator();
+
+$authService =
+    new AuthService(
+        $validator
+    );
 
 /* =========================
    ROUTING

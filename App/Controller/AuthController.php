@@ -19,37 +19,74 @@ class AuthController extends BaseController
      * Register page
      */
     public function register(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+{
+    if (
+        $_SERVER[
+            'REQUEST_METHOD'
+        ] === 'POST'
+    ) {
 
-            $name = trim($_POST['name']);
-            $email = trim($_POST['email']);
-            $password = trim($_POST['password']);
-
-            $result =
-                $this->authService
-                    ->register(
-                        $name,
-                        $email,
-                        $password
-                    );
-
-            if ($result['success']) {
-                $this->redirect('?page=login');
-            }
-
-            $this->render(
-                'auth/register',
-                [
-                    'error' => $result['message']
-                ]
+        $name =
+            trim(
+                $_POST['name']
             );
 
-            return;
+        $email =
+            trim(
+                $_POST['email']
+            );
+
+        $password =
+            trim(
+                $_POST['password']
+            );
+
+        $result =
+            $this->authService
+                ->register(
+
+                    $name,
+
+                    $email,
+
+                    $password
+                );
+
+        if (
+            $result['success']
+        ) {
+
+            $this->redirect(
+                '?page=login'
+            );
         }
 
-        $this->render('auth/register');
+        $this->render(
+
+            'auth/register',
+
+            [
+
+                'errors' =>
+                    $result[
+                        'errors'
+                    ] ?? []
+            ]
+        );
+
+        return;
     }
+
+    $this->render(
+
+        'auth/register',
+
+        [
+
+            'errors' => []
+        ]
+    );
+}
 
     /**
      * Login page
@@ -74,20 +111,24 @@ class AuthController extends BaseController
             );
         }
 
-        $this->render(
-            'auth/login',
-            [
-                'error' =>
-                    $result['message']
-            ]
-        );
+       $this->render(
+    'auth/login',
+    [
+        'errors' =>
+            $result['errors']
+            ?? []
+    ]
+);
 
         return;
     }
 
     $this->render(
-        'auth/login'
-    );
+    'auth/login',
+    [
+        'errors' => []
+    ]
+);
 }
 
     /**

@@ -2,18 +2,26 @@
 
 namespace App\Service;
 
+use App\Model\User;
 use App\Repository\UserRepository;
 
 class AuthService extends BaseService
 {
     private UserRepository $userRepository;
 
-    public function __construct()
-    {
+    private Validator $validator;
+
+    public function __construct(
+        Validator $validator
+    ) {
+
         $this->userRepository =
             new UserRepository(
                 $this->db()
             );
+
+        $this->validator =
+            $validator;
     }
 
     /**
@@ -25,41 +33,97 @@ class AuthService extends BaseService
         string $password
     ): array {
 
+        $data = [
+
+            'name' => $name,
+
+            'email' => $email,
+
+            'password' => $password
+        ];
+
+        $valid =
+            $this->validator
+                ->validate(
+
+                    $data,
+
+                    User::registerRules()
+                );
+
+        if (!$valid) {
+
+            return [
+
+                'success' => false,
+
+                'errors' =>
+
+                    $this->validator
+                        ->errors()
+            ];
+        }
+
         $existingUser =
             $this->userRepository
-                ->findByEmail($email);
+                ->findByEmail(
+                    $email
+                );
 
         if ($existingUser) {
+
             return [
+
                 'success' => false,
-                'message' => 'Email already exists'
+
+                'errors' => [
+
+                    'email' => [
+
+                        'Email already exists'
+                    ]
+                ]
             ];
         }
 
         $hashedPassword =
             password_hash(
+
                 $password,
+
                 PASSWORD_BCRYPT
             );
 
         $created =
             $this->userRepository
                 ->create(
+
                     $name,
+
                     $email,
+
                     $hashedPassword
                 );
 
         if (!$created) {
+
             return [
+
                 'success' => false,
-                'message' => 'Registration failed'
+
+                'errors' => [
+
+                    'general' => [
+
+                        'Registration failed'
+                    ]
+                ]
             ];
         }
 
         return [
-            'success' => true,
-            'message' => 'Registration successful'
+
+            'success' => true
         ];
     }
 
@@ -71,39 +135,93 @@ class AuthService extends BaseService
         string $password
     ): array {
 
+        $data = [
+
+            'email' => $email,
+
+            'password' => $password
+        ];
+
+        $valid =
+            $this->validator
+                ->validate(
+
+                    $data,
+
+                    User::loginRules()
+                );
+
+        if (!$valid) {
+
+            return [
+
+                'success' => false,
+
+                'errors' =>
+
+                    $this->validator
+                        ->errors()
+            ];
+        }
+
         $user =
             $this->userRepository
-                ->findByEmail($email);
+                ->findByEmail(
+                    $email
+                );
 
         if (!$user) {
+
             return [
+
                 'success' => false,
-                'message' => 'Invalid email or password'
+
+                'errors' => [
+
+                    'email' => [
+
+                        'Invalid email or password'
+                    ]
+                ]
             ];
         }
 
         $validPassword =
             password_verify(
+
                 $password,
+
                 $user['password']
             );
 
         if (!$validPassword) {
+
             return [
+
                 'success' => false,
-                'message' => 'Invalid email or password'
+
+                'errors' => [
+
+                    'password' => [
+
+                        'Invalid email or password'
+                    ]
+                ]
             ];
         }
 
         $_SESSION['user'] = [
+
             'id' => $user['id'],
+
             'name' => $user['name'],
+
             'email' => $user['email']
         ];
 
         return [
-            'success' => true,
-            'message' => 'Login successful'
+
+            'success' => true
         ];
     }
 
@@ -112,7 +230,9 @@ class AuthService extends BaseService
      */
     public function logout(): void
     {
-        unset($_SESSION['user']);
+        unset(
+            $_SESSION['user']
+        );
     }
 
     /**
@@ -120,7 +240,9 @@ class AuthService extends BaseService
      */
     public function check(): bool
     {
-        return isset($_SESSION['user']);
+        return isset(
+            $_SESSION['user']
+        );
     }
 
     /**
@@ -128,6 +250,8 @@ class AuthService extends BaseService
      */
     public function user(): ?array
     {
-        return $_SESSION['user'] ?? null;
+        return
+            $_SESSION['user']
+            ?? null;
     }
 }
