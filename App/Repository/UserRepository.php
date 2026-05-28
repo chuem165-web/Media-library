@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Contract\UserRepositoryInterface;
+use App\Mapper\UserMapper;
+use App\Model\User;
 use PDO;
 
-class UserRepository
-    extends BaseRepository
-    implements UserRepositoryInterface
+class UserRepository extends BaseRepository
 {
-     protected string $table = 'users';
+    protected string $table = 'users';
+
     public function create(
-        string $name,
-        string $email,
-        string $password
+        User $user
     ): bool {
 
         $sql = "
-            INSERT INTO users (
+
+            INSERT INTO users(
                 name,
                 email,
                 password
             )
-            VALUES (
+
+            VALUES(
                 :name,
                 :email,
                 :password
@@ -32,17 +32,24 @@ class UserRepository
         $stmt = $this->query($sql);
 
         return $stmt->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':password' => $password
+
+            ':name' =>
+                $user->getName(),
+
+            ':email' =>
+                $user->getEmail(),
+
+            ':password' =>
+                $user->getPasswordHash()
         ]);
     }
 
     public function findByEmail(
         string $email
-    ): ?array {
+    ): ?User {
 
         $sql = "
+
             SELECT *
             FROM users
             WHERE email = :email
@@ -55,11 +62,13 @@ class UserRepository
             ':email' => $email
         ]);
 
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data =
+            $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $user ?: null;
+        if (!$data) {
+            return null;
+        }
+
+        return UserMapper::mapToEntity($data);
     }
-
-    
-
 }

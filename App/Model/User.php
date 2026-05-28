@@ -4,50 +4,85 @@ namespace App\Model;
 
 class User
 {
-    public static function registerRules(): array
-    {
-        return [
+    private ?int $id;
 
-            'name' => [
+    private string $name;
 
-                'required' => true,
+    private string $email;
 
-                'min' => 3,
+    private string $passwordHash;
 
-                'max' => 50
-            ],
+    public function __construct(
+        ?int $id,
+        string $name,
+        string $email,
+        string $passwordHash
+    ) {
+        $this->id = $id;
 
-            'email' => [
+        $this->name = $name;
 
-                'required' => true,
+        $this->email = $email;
 
-                'email' => true
-            ],
-
-            'password' => [
-
-                'required' => true,
-
-                'min' => 6
-            ]
-        ];
+        $this->passwordHash = $passwordHash;
     }
 
-    public static function loginRules(): array
+    public static function create(
+        string $name,
+        string $email,
+        string $password
+    ): self {
+
+        return new self(
+            null,
+            $name,
+            $email,
+            password_hash(
+                $password,
+                PASSWORD_BCRYPT
+            )
+        );
+    }
+
+    public function verifyPassword(
+        string $password
+    ): bool {
+
+        return password_verify(
+            $password,
+            $this->passwordHash
+        );
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getPasswordHash(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function toArray(): array
     {
         return [
 
-            'email' => [
+            'id' => $this->id,
 
-                'required' => true,
+            'name' => $this->name,
 
-                'email' => true
-            ],
-
-            'password' => [
-
-                'required' => true
-            ]
+            'email' => $this->email
         ];
     }
 }

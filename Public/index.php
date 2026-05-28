@@ -1,4 +1,5 @@
 <?php
+
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 
@@ -7,24 +8,37 @@ if (!defined('BASE_PATH')) {
 }
 
 require_once BASE_PATH . '/vendor/autoload.php';
+
 session_start();
 
+/* =========================
+   ENV LOAD
+========================= */
 try {
     Dotenv::createImmutable(BASE_PATH)->safeLoad();
 } catch (InvalidPathException $e) {
-    // Skip loading .env when the file is not present.
+    // Skip if .env does not exist
 }
 
-
+/* =========================
+   LEGACY INCLUDES
+========================= */
 require_once BASE_PATH . '/inc/Database.php';
 require_once BASE_PATH . '/view/ItemView.php';
+
+/* =========================
+   USE STATEMENTS
+========================= */
 
 use App\Service\CatalogService;
 use App\Service\FormatService;
 use App\Service\SuggestService;
 use App\Service\MailService;
 use App\Service\AuthService;
-use App\Service\Validator;
+
+use App\Validation\Validator;
+
+use App\Repository\UserRepository;
 
 use App\Controller\Api\ApiCatalogController;
 use App\Controller\Api\ApiDetailsController;
@@ -35,25 +49,42 @@ use App\Controller\DetailsController;
 use App\Controller\SuggestController;
 use App\Controller\AuthController;
 
-$catalogService =
-    new CatalogService();
+/* =========================
+   SERVICES (MANUAL DI)
+========================= */
 
-$formatService =
-    new FormatService();
+$catalogService = new CatalogService();
+$formatService  = new FormatService();
+$suggestService = new SuggestService();
+$mailService    = new MailService();
 
-$suggestService =
-    new SuggestService();
+/* =========================
+   DB CONNECTION
+========================= */
 
-$mailService =
-    new MailService();
+// FIXED: must provide real PDO connection
+$db = Database::getConnection();
 
-$validator =
-    new Validator();
+/* =========================
+   REPOSITORY
+========================= */
 
-$authService =
-    new AuthService(
-        $validator
-    );
+// FIXED: correct dependency injection for repository
+$userRepository = new UserRepository($db);
+
+/* =========================
+   VALIDATOR
+========================= */
+
+// FIXED: ONLY ONE import + correct usage
+$validator = new Validator();
+
+/* =========================
+   AUTH SERVICE
+========================= */
+
+// FIXED: AuthService MUST receive UserRepository (NOT Validator)
+$authService = new AuthService($userRepository);
 
 /* =========================
    ROUTING
@@ -62,13 +93,14 @@ $authService =
 $page = $_GET['page'] ?? 'home';
 
 /* =========================
-   API ROUTES (IMPORTANT FIRST)
+   API ROUTES
 ========================= */
+
 if (str_starts_with($page, 'api/')) {
 
     switch ($page) {
 
-            case 'api/catalog':
+        case 'api/catalog':
             $controller = new ApiCatalogController($catalogService);
             $controller->index();
             exit;
@@ -79,9 +111,9 @@ if (str_starts_with($page, 'api/')) {
             exit;
 
         case 'api/suggest':
-    $controller = new ApiSuggestController($formatService);
-    $controller->submit();
-    exit;
+            $controller = new ApiSuggestController($formatService);
+            $controller->submit();
+            exit;
 
         default:
             http_response_code(404);
@@ -94,7 +126,7 @@ if (str_starts_with($page, 'api/')) {
 }
 
 /* =========================
-   NORMAL MVC ROUTES
+   WEB ROUTES
 ========================= */
 
 switch ($page) {
@@ -114,30 +146,27 @@ switch ($page) {
         break;
 
     case 'catalog':
-        $controller = new CatalogController($catalogService , $authService);
+        $controller = new CatalogController(
+            $catalogService,
+            $authService
+        );
         $controller->index();
         break;
 
     case 'register':
-    $controller =
-        new AuthController($authService);
+        $controller = new AuthController($authService);
+        $controller->register();
+        break;
 
-    $controller->register();
-    break;
+    case 'login':
+        $controller = new AuthController($authService);
+        $controller->login();
+        break;
 
-case 'login':
-    $controller =
-        new AuthController($authService);
-
-    $controller->login();
-    break;
-
-case 'logout':
-    $controller =
-        new AuthController($authService);
-
-    $controller->logout();
-    break;
+    case 'logout':
+        $controller = new AuthController($authService);
+        $controller->logout();
+        break;
 
     default:
         $controller = new CatalogController($catalogService);

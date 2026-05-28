@@ -2,138 +2,130 @@
 
 namespace App\Controller;
 
+use App\DTO\LoginDTO;
+use App\DTO\RegisterDTO;
+use App\Http\Request\LoginRequest;
+use App\Http\Request\RegisterRequest;
 use App\Service\AuthService;
 
 class AuthController extends BaseController
 {
-    private AuthService $authService;
-
     public function __construct(
-        AuthService $authService
-    ) {
-        $this->authService =
-            $authService;
-    }
+        private AuthService $authService
+    ) {}
 
-    /**
-     * Register page
-     */
     public function register(): void
-{
-    if (
-        $_SERVER[
-            'REQUEST_METHOD'
-        ] === 'POST'
-    ) {
-
-        $name =
-            trim(
-                $_POST['name']
-            );
-
-        $email =
-            trim(
-                $_POST['email']
-            );
-
-        $password =
-            trim(
-                $_POST['password']
-            );
-
-        $result =
-            $this->authService
-                ->register(
-
-                    $name,
-
-                    $email,
-
-                    $password
-                );
-
+    {
         if (
-            $result['success']
+            $_SERVER['REQUEST_METHOD']
+            === 'POST'
         ) {
 
-            $this->redirect(
-                '?page=login'
+            $request =
+                new RegisterRequest($_POST);
+
+            if (!$request->validate()) {
+
+                $this->render(
+                    'auth/register',
+                    [
+                        'errors' =>
+                            $request->errors()
+                    ]
+                );
+
+                return;
+            }
+
+            $dto = new RegisterDTO(
+
+                $request->input('name'),
+
+                $request->input('email'),
+
+                $request->input('password')
             );
+
+            $response =
+                $this->authService
+                    ->register($dto);
+
+            if ($response->success) {
+
+                $this->redirect(
+                    '?page=login'
+                );
+            }
         }
 
         $this->render(
-
             'auth/register',
-
             [
-
-                'errors' =>
-                    $result[
-                        'errors'
-                    ] ?? []
+                'errors' => []
             ]
         );
-
-        return;
     }
 
-    $this->render(
+    public function login(): void
+    {
+        if (
+            $_SERVER['REQUEST_METHOD']
+            === 'POST'
+        ) {
 
-        'auth/register',
+            $request =
+                new LoginRequest($_POST);
 
-        [
+            if (!$request->validate()) {
 
-            'errors' => []
-        ]
-    );
-}
-
-    /**
-     * Login page
-     */
-   public function login(): void
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-        $email = trim($_POST['email']);
-        $password = trim($_POST['password']);
-
-        $result =
-            $this->authService
-                ->login(
-                    $email,
-                    $password
+                $this->render(
+                    'auth/login',
+                    [
+                        'errors' =>
+                            $request->errors()
+                    ]
                 );
 
-        if ($result['success']) {
-            $this->redirect(
-                '?page=catalog'
+                return;
+            }
+
+            $dto = new LoginDTO(
+
+                $request->input('email'),
+
+                $request->input('password')
             );
+
+            $response =
+                $this->authService
+                    ->login($dto);
+
+            if ($response->success) {
+
+                $this->redirect(
+                    '?page=catalog'
+                );
+            }
+
+            $this->render(
+                'auth/login',
+                [
+                    'errors' =>
+                        $response->errors
+                ]
+            );
+
+            return;
         }
 
-       $this->render(
-    'auth/login',
-    [
-        'errors' =>
-            $result['errors']
-            ?? []
-    ]
-);
-
-        return;
+        $this->render(
+            'auth/login',
+            [
+                'errors' => []
+            ]
+        );
     }
 
-    $this->render(
-    'auth/login',
-    [
-        'errors' => []
-    ]
-);
-}
-
-    /**
-     * Logout
-     */
     public function logout(): void
     {
         $this->authService->logout();

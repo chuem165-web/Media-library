@@ -2,256 +2,82 @@
 
 namespace App\Service;
 
+use App\DTO\ApiResponseDTO;
+use App\DTO\LoginDTO;
+use App\DTO\RegisterDTO;
 use App\Model\User;
 use App\Repository\UserRepository;
 
-class AuthService extends BaseService
+class AuthService
 {
-    private UserRepository $userRepository;
-
-    private Validator $validator;
-
     public function __construct(
-        Validator $validator
-    ) {
+        private UserRepository $users
+    ) {}
 
-        $this->userRepository =
-            new UserRepository(
-                $this->db()
-            );
-
-        $this->validator =
-            $validator;
-    }
-
-    /**
-     * Register user
-     */
     public function register(
-        string $name,
-        string $email,
-        string $password
-    ): array {
+        RegisterDTO $dto
+    ): ApiResponseDTO {
 
-        $data = [
+        $user = User::create(
 
-            'name' => $name,
+            // CHANGED: now using getters instead of direct property access
+            $dto->getName(),
+            $dto->getEmail(),
+            $dto->getPassword()
+        );
 
-            'email' => $email,
+        $this->users->create($user);
 
-            'password' => $password
-        ];
-
-        $valid =
-            $this->validator
-                ->validate(
-
-                    $data,
-
-                    User::registerRules()
-                );
-
-        if (!$valid) {
-
-            return [
-
-                'success' => false,
-
-                'errors' =>
-
-                    $this->validator
-                        ->errors()
-            ];
-        }
-
-        $existingUser =
-            $this->userRepository
-                ->findByEmail(
-                    $email
-                );
-
-        if ($existingUser) {
-
-            return [
-
-                'success' => false,
-
-                'errors' => [
-
-                    'email' => [
-
-                        'Email already exists'
-                    ]
-                ]
-            ];
-        }
-
-        $hashedPassword =
-            password_hash(
-
-                $password,
-
-                PASSWORD_BCRYPT
-            );
-
-        $created =
-            $this->userRepository
-                ->create(
-
-                    $name,
-
-                    $email,
-
-                    $hashedPassword
-                );
-
-        if (!$created) {
-
-            return [
-
-                'success' => false,
-
-                'errors' => [
-
-                    'general' => [
-
-                        'Registration failed'
-                    ]
-                ]
-            ];
-        }
-
-        return [
-
-            'success' => true
-        ];
+        return new ApiResponseDTO(
+            true,
+            'Registration successful'
+        );
     }
 
-    /**
-     * Login user
-     */
     public function login(
-        string $email,
-        string $password
-    ): array {
-
-        $data = [
-
-            'email' => $email,
-
-            'password' => $password
-        ];
-
-        $valid =
-            $this->validator
-                ->validate(
-
-                    $data,
-
-                    User::loginRules()
-                );
-
-        if (!$valid) {
-
-            return [
-
-                'success' => false,
-
-                'errors' =>
-
-                    $this->validator
-                        ->errors()
-            ];
-        }
+        LoginDTO $dto
+    ): ApiResponseDTO {
 
         $user =
-            $this->userRepository
+            $this->users
                 ->findByEmail(
-                    $email
+
+                    // CHANGED: fixed private property access → getter
+                    $dto->getEmail()
                 );
 
-        if (!$user) {
+        if (
+            !$user ||
+            !$user->verifyPassword(
 
-            return [
+                // CHANGED: fixed private property access → getter
+                $dto->getPassword()
+            )
+        ) {
 
-                'success' => false,
-
-                'errors' => [
-
-                    'email' => [
-
-                        'Invalid email or password'
-                    ]
+            return new ApiResponseDTO(
+                false,
+                'Invalid credentials',
+                null,
+                [
+                    'email' =>
+                        'Wrong email or password'
                 ]
-            ];
-        }
-
-        $validPassword =
-            password_verify(
-
-                $password,
-
-                $user['password']
             );
-
-        if (!$validPassword) {
-
-            return [
-
-                'success' => false,
-
-                'errors' => [
-
-                    'password' => [
-
-                        'Invalid email or password'
-                    ]
-                ]
-            ];
         }
 
-        $_SESSION['user'] = [
+        $_SESSION['user'] =
+            $user->toArray();
 
-            'id' => $user['id'],
-
-            'name' => $user['name'],
-
-            'email' => $user['email']
-        ];
-
-        return [
-
-            'success' => true
-        ];
+        return new ApiResponseDTO(
+            true,
+            'Login successful',
+            $user->toArray()
+        );
     }
 
-    /**
-     * Logout
-     */
     public function logout(): void
     {
-        unset(
-            $_SESSION['user']
-        );
-    }
-
-    /**
-     * Check login
-     */
-    public function check(): bool
-    {
-        return isset(
-            $_SESSION['user']
-        );
-    }
-
-    /**
-     * Current user
-     */
-    public function user(): ?array
-    {
-        return
-            $_SESSION['user']
-            ?? null;
+        session_destroy();
     }
 }
