@@ -1,14 +1,14 @@
 <?php
 //System Path(for php)
 if (!defined('BASE_PATH')) {
-    define('BASE_PATH', dirname(DIR));
+    define('BASE_PATH', dirname(__DIR__));
 }
 
 // browser path (for css, js, images)
 if (!defined('BASE_URL')) {
     // // define('BASE_URL', '/ITVisionHub/media library');
     // define('BASE_URL', '/library/MediaLibrary-MVC-/Public');
-    define('BASE_URL', '/library/MediaLibrary-MVC-');
+    define('BASE_URL', '/library');
 }
 class Database
 {
