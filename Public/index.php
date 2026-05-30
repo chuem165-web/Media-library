@@ -10,7 +10,16 @@ if (!defined('BASE_PATH')) {
 require_once BASE_PATH . '/vendor/autoload.php';
 
 session_start();
+/* =========================
+   GLOBAL EXCEPTION HANDLER
+========================= */
 
+use App\Handler\GlobalExceptionHandler;
+
+set_exception_handler([
+    GlobalExceptionHandler::class,
+    'handle'
+]);
 /* =========================
    ENV LOAD
 ========================= */

@@ -6,39 +6,42 @@ use App\Service\CatalogService;
 
 class CatalogController extends BaseController
 {
-    private CatalogService $catalogService;
-
     public function __construct(
-        CatalogService $catalogService
-    ) {
-        $this->catalogService = $catalogService;
-    }
+        private CatalogService $catalogService
+    ) {}
 
     public function home(): void
     {
-        $data = [
-            'pageTitle' => 'Personal Media Library',
-            'section' => 'catalog',
-            'random' => $this->catalogService
-                ->random_catalog_array()
-        ];
+        $this->requireAuth();
 
         $this->render(
             'home',
-            $data
+            [
+                'pageTitle' =>
+                    'Personal Media Library',
+
+                'section' =>
+                    'catalog',
+
+                'random' =>
+                    $this
+                        ->catalogService
+                        ->random_catalog_array()
+            ]
         );
     }
 
     public function index(): void
     {
-        $data = $this->catalogService
-            ->getCatalogPage($_GET);
+        $this->requireAuth();
+
+        $data =
+            $this->catalogService
+                ->getCatalogPage($_GET);
 
         $this->render(
             'catalog',
             $data
         );
-
-
     }
 }

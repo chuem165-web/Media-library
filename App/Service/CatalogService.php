@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Exceptions\NotFoundException;
+use App\Exceptions\ValidationException;
 use App\Contract\CatalogRepositoryInterface;
 use App\Repository\CatalogRepository;
 
@@ -218,7 +220,31 @@ class CatalogService extends BaseService
      * ========================================================= */
     public function getSingleItem(int $id): ?array
 {
-    return $this->repo->getById($id);
+   // =========================
+    // VALIDATION
+    // =========================
+    if ($id <= 0) {
+        throw new ValidationException([
+            'id' => 'Invalid catalog ID'
+        ]);
+    }
+
+    // =========================
+    // FIND ITEM
+    // =========================
+    $item = $this->repo->getById($id);
+
+    // =========================
+    // NOT FOUND
+    // =========================
+    if (!$item) {
+        throw new NotFoundException(
+            "Catalog item with ID {$id} not found"
+        );
+    }
+    
+
+    return $item;
 }
 
 

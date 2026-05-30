@@ -3,39 +3,21 @@
 namespace App\Controller;
 
 use App\Service\FormatService;
-use App\Service\SuggestService;
 use App\Service\MailService;
+use App\Service\SuggestService;
 
 class SuggestController
     extends BaseController
 {
-    private FormatService
-        $formatService;
-
-    private SuggestService
-        $suggestService;
-
-    private MailService
-        $mailService;
-
     public function __construct(
-        FormatService $formatService,
-        SuggestService $suggestService,
-        MailService $mailService
-    ) {
-
-        $this->formatService =
-            $formatService;
-
-        $this->suggestService =
-            $suggestService;
-
-        $this->mailService =
-            $mailService;
-    }
+        private FormatService $formatService,
+        private SuggestService $suggestService,
+        private MailService $mailService
+    ) {}
 
     public function index(): void
     {
+        $this->requireAuth();
 
         $data = [
             'pageTitle' =>
@@ -60,21 +42,17 @@ class SuggestController
             'genres' =>
                 $this
                     ->formatService
-                    ->genres_array()
+                    ->genres_array(),
+
+            'errors' => []
         ];
 
-        if (
-            $_SERVER[
-                'REQUEST_METHOD'
-            ] === 'POST'
-        ) {
+        if ($this->isPost()) {
 
             $form =
                 $this
-                ->suggestService
-                ->process(
-                    $_POST
-                );
+                    ->suggestService
+                    ->process($_POST);
 
             $data =
                 array_merge(
@@ -84,9 +62,7 @@ class SuggestController
 
             if (
                 empty(
-                    $form[
-                        'error_message'
-                    ]
+                    $form['error_message']
                 )
             ) {
 
@@ -97,7 +73,7 @@ class SuggestController
                     );
 
                 $this->redirect(
-                    'index.php?page=suggest&status=thanks'
+                    '?page=suggest&status=thanks'
                 );
             }
         }

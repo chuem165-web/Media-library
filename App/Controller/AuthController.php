@@ -14,122 +14,85 @@ class AuthController extends BaseController
         private AuthService $authService
     ) {}
 
+    /**
+     * REGISTER FLOW
+     */
     public function register(): void
     {
-        if (
-            $_SERVER['REQUEST_METHOD']
-            === 'POST'
-        ) {
-
-            $request =
-                new RegisterRequest($_POST);
-
-            if (!$request->validate()) {
-
-                $this->render(
-                    'auth/register',
-                    [
-                        'errors' =>
-                            $request->errors()
-                    ]
-                );
-
-                return;
-            }
-
-            $dto = new RegisterDTO(
-
-                $request->input('name'),
-
-                $request->input('email'),
-
-                $request->input('password')
-            );
-
-            $response =
-                $this->authService
-                    ->register($dto);
-
-            if ($response->success) {
-
-                $this->redirect(
-                    '?page=login'
-                );
-            }
-        }
-
-        $this->render(
-            'auth/register',
-            [
+        // CHANGE: Keep GET request for form display
+        if (!$this->isPost()) {
+            $this->render('auth/register', [
                 'errors' => []
-            ]
-        );
-    }
-
-    public function login(): void
-    {
-        if (
-            $_SERVER['REQUEST_METHOD']
-            === 'POST'
-        ) {
-
-            $request =
-                new LoginRequest($_POST);
-
-            if (!$request->validate()) {
-
-                $this->render(
-                    'auth/login',
-                    [
-                        'errors' =>
-                            $request->errors()
-                    ]
-                );
-
-                return;
-            }
-
-            $dto = new LoginDTO(
-
-                $request->input('email'),
-
-                $request->input('password')
-            );
-
-            $response =
-                $this->authService
-                    ->login($dto);
-
-            if ($response->success) {
-
-                $this->redirect(
-                    '?page=catalog'
-                );
-            }
-
-            $this->render(
-                'auth/login',
-                [
-                    'errors' =>
-                        $response->errors
-                ]
-            );
-
+            ]);
             return;
         }
 
-        $this->render(
-            'auth/login',
-            [
-                'errors' => []
-            ]
+        $request = new RegisterRequest($_POST);
+
+        //  CHANGE: stop execution if validation fails (already rendering inside BaseController)
+        if (!$this->validateRequest($request, 'auth/register')) {
+            return;
+        }
+
+        $dto = new RegisterDTO(
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('password')
+        );
+
+        $response = $this->authService->register($dto);
+
+        //  CHANGE: centralized response handler (redirect or render errors)
+        $this->handleResponse(
+            $response,
+            '?page=login',      // success redirect
+            'auth/register'     // failure view
         );
     }
 
-    public function logout(): void
+    /**
+     * LOGIN FLOW
+     */
+    public function login(): void
     {
+        //  CHANGE: GET request shows login page
+        if (!$this->isPost()) {
+            $this->render('auth/login', [
+                'errors' => []
+            ]);
+            return;
+        }
+
+        $request = new LoginRequest($_POST);
+
+        //  CHANGE: stop if validation fails
+        if (!$this->validateRequest($request, 'auth/login')) {
+            return;
+        }
+
+        $dto = new LoginDTO(
+            $request->input('email'),
+            $request->input('password')
+        );
+
+        $response = $this->authService->login($dto);
+
+        // CHANGE: on success redirect to catalog
+        $this->handleResponse(
+            $response,
+            '?page=catalog',
+            'auth/login'
+        );
+    }
+     /**
+     * LOGOUT FLOW
+     */
+     public function logout(): void
+    {
+        //  CHANGE: delegate session cleanup to service
         $this->authService->logout();
 
+       //  CHANGE: always redirect after logout
         $this->redirect('?page=login');
     }
-}
+ }

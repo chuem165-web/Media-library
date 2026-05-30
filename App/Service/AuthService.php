@@ -14,13 +14,9 @@ class AuthService
         private UserRepository $users
     ) {}
 
-    public function register(
-        RegisterDTO $dto
-    ): ApiResponseDTO {
-
+    public function register(RegisterDTO $dto): ApiResponseDTO
+    {
         $user = User::create(
-
-            // CHANGED: now using getters instead of direct property access
             $dto->getName(),
             $dto->getEmail(),
             $dto->getPassword()
@@ -34,50 +30,46 @@ class AuthService
         );
     }
 
-    public function login(
-        LoginDTO $dto
-    ): ApiResponseDTO {
-
-        $user =
-            $this->users
-                ->findByEmail(
-
-                    // CHANGED: fixed private property access → getter
-                    $dto->getEmail()
-                );
+    public function login(LoginDTO $dto): ApiResponseDTO
+    {
+        $user = $this->users->findByEmail(
+            $dto->getEmail()
+        );
 
         if (
             !$user ||
-            !$user->verifyPassword(
-
-                // CHANGED: fixed private property access → getter
-                $dto->getPassword()
-            )
+            !$user->verifyPassword($dto->getPassword())
         ) {
-
             return new ApiResponseDTO(
                 false,
                 'Invalid credentials',
                 null,
                 [
-                    'email' =>
-                        'Wrong email or password'
+                    'email' => 'Wrong email or password'
                 ]
             );
         }
 
-        $_SESSION['user'] =
-            $user->toArray();
+        //  SAFE SESSION HANDLING
+        $_SESSION['user'] = [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail()
+        ];
 
         return new ApiResponseDTO(
             true,
             'Login successful',
-            $user->toArray()
+            $_SESSION['user']
         );
     }
 
     public function logout(): void
     {
-        session_destroy();
+        //  ONLY remove auth data (safe & clean)
+        unset($_SESSION['user']);
+
+        // Optional: regenerate session ID for security
+        session_regenerate_id(true);
     }
 }

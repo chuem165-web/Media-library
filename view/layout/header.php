@@ -1,13 +1,17 @@
+<?php
+$user = \App\Helper\Auth::user();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($pageTitle ?? 'Media Library') ?></title>
 
-     <!--<link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css"> -->
-     <link rel="stylesheet" href="/library/MediaLibrary-MVC-/css/style.css"> 
-    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/library/css/style.css"> 
 </head>
+
 <body>
 
 <div class="page-container">
@@ -24,63 +28,65 @@
         </h1>
 
         <!-- NAVIGATION -->
-       <ul class="nav">
+        <ul class="nav">
 
-<li class="<?= (($section ?? '') === 'books') ? 'on' : '' ?>">
-    <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=books">
-        <img src="<?= BASE_URL ?>/img/book.png"> Books
-    </a>
-</li>
+            <li class="<?= (($section ?? '') === 'books') ? 'on' : '' ?>">
+                <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=books">
+                    <img src="<?= BASE_URL ?>/img/book.png"> Books
+                </a>
+            </li>
 
-<li class="<?= (($section ?? '') === 'movies') ? 'on' : '' ?>">
-    <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=movies">
-        <img src="<?= BASE_URL ?>/img/movie.png"> Movies
-    </a>
-</li>
+            <li class="<?= (($section ?? '') === 'movies') ? 'on' : '' ?>">
+                <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=movies">
+                    <img src="<?= BASE_URL ?>/img/movie.png"> Movies
+                </a>
+            </li>
 
-<li class="<?= (($section ?? '') === 'music') ? 'on' : '' ?>">
-    <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=music">
-        <img src="<?= BASE_URL ?>/img/music.png"> Music
-    </a>
-</li>
+            <li class="<?= (($section ?? '') === 'music') ? 'on' : '' ?>">
+                <a href="<?= BASE_URL ?>/Public/index.php?page=catalog&cat=music">
+                    <img src="<?= BASE_URL ?>/img/music.png"> Music
+                </a>
+            </li>
 
-<li class="<?= (($section ?? '') === 'suggest') ? 'on' : '' ?>">
-    <a href="<?= BASE_URL ?>/Public/index.php?page=suggest">
-        <img src="<?= BASE_URL ?>/img/suggestion.png"> Suggest
-    </a>
-</li>
+            <li class="<?= (($section ?? '') === 'suggest') ? 'on' : '' ?>">
+                <a href="<?= BASE_URL ?>/Public/index.php?page=suggest">
+                    <img src="<?= BASE_URL ?>/img/suggestion.png"> Suggest
+                </a>
+            </li>
 
-<?php if (isset($_SESSION['user'])): ?>
+            <!-- AUTH SECTION (FIXED) -->
+            <?php if ($user): ?>
 
-<li>
-    Welcome <?= htmlspecialchars($_SESSION['user']['name']) ?>
-</li>
+                <li>
+                    Welcome <?= htmlspecialchars($user['name']) ?>
+                </li>
 
-<li class="<?= (($page ?? '') === 'logout') ? 'on' : '' ?>">
-    <a href="?page=logout">Logout</a>
-</li>
+                <li class="<?= (($page ?? '') === 'logout') ? 'on' : '' ?>">
+                    <a href="?page=logout">Logout</a>
+                </li>
 
-<?php else: ?>
+            <?php else: ?>
 
-<li class="<?= (($page ?? '') === 'login') ? 'on' : '' ?>">
-    <a href="?page=login">Login</a>
-</li>
+                <li class="<?= (($page ?? '') === 'login') ? 'on' : '' ?>">
+                    <a href="?page=login">Login</a>
+                </li>
 
-<li class="<?= (($page ?? '') === 'register') ? 'on' : '' ?>">
-    <a href="?page=register">Register</a>
-</li>
+                <li class="<?= (($page ?? '') === 'register') ? 'on' : '' ?>">
+                    <a href="?page=register">Register</a>
+                </li>
 
-<?php endif; ?>
+            <?php endif; ?>
 
-</ul>
+        </ul>
 
     </div>
 </header>
 
 <!-- SEARCH BAR -->
- <?php if (empty($hideSearch)): ?>
+<?php if (empty($hideSearch)): ?>
 <div class="search">
     <div class="wrapper">
+
         <form method="get" action="<?= BASE_URL ?>/Public/index.php">
             <input type="hidden" name="page" value="catalog">
 
@@ -92,10 +98,9 @@
             <input type="text" name="s" id="s">
             <input type="submit" value="Go">
         </form>
+
     </div>
 </div>
-
-
 <?php endif; ?>
 
 <main id="content">

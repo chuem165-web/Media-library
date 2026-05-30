@@ -6,38 +6,30 @@ use App\Service\CatalogService;
 
 class DetailsController extends BaseController
 {
-    private CatalogService $catalogService;
-
     public function __construct(
-        CatalogService $catalogService
-    ) {
-        $this->catalogService = $catalogService;
-    }
+        private CatalogService $catalogService
+    ) {}
 
     public function show(): void
     {
-        $id = $this->input(
+        $this->requireAuth();
+
+        $id = (int) $this->input(
             INPUT_GET,
             'id',
             FILTER_VALIDATE_INT
         );
 
-        if (!$id) {
-            $this->redirectCatalog();
-        }
-
         $item = $this->catalogService
             ->getSingleItem($id);
-
-        if (!$item) {
-            $this->redirectCatalog();
-        }
 
         $this->render(
             'details',
             [
                 'item' => $item,
+
                 'pageTitle' => $item['title'],
+
                 'section' => $item['category']
             ]
         );
@@ -46,8 +38,7 @@ class DetailsController extends BaseController
     private function redirectCatalog(): void
     {
         $this->redirect(
-            BASE_URL
-            . '/Public/index.php?page=catalog'
+            '?page=catalog'
         );
     }
 }
